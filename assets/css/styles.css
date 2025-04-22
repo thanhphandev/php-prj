@@ -1,0 +1,211 @@
+/* Định nghĩa màu sắc */
+:root {
+    --primary: #7B61FF;
+    --hover: #6C52E0;
+    --accent: #A693FF;
+    --background: #F5F7FF;
+    --borderSubtle: #DADFFF;
+}
+
+
+/* Định nghĩa lớp CSS */
+.bg-primary {
+    background-color: var(--primary);
+}
+
+.text-primary {
+    color: var(--primary);
+}
+
+.bg-accent {
+    background-color: var(--accent);
+}
+
+.bg-background {
+    background-color: var(--background);
+}
+
+.border-subtle {
+    border: 1px solid var(--borderSubtle);
+}
+
+.hover\:bg-primary:hover {
+    background-color: var(--primary);
+}
+
+.hover\:text-primary:hover {
+    color: var(--primary);
+}
+
+/* Primary button */
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+    font-weight: bold;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+    background-color: var(--hover);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Secondary button */
+.btn-secondary {
+    background-color: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    font-weight: bold;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.75rem;
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Tertiary (Ghost) button */
+.btn-tertiary {
+    background-color: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    font-weight: bold;
+    padding: 0.5rem 1.5rem;
+    border-radius: 9999px; /* Rounded full */
+}
+
+.btn-tertiary:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-tertiary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Danger button */
+.btn-danger {
+    background-color: #F87171; /* Red-500 */
+    color: white;
+    font-weight: bold;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-danger:hover {
+    background-color: #F44336; /* Red-600 */
+}
+
+.btn-danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Success button */
+.btn-success {
+    background-color: #34D399; /* Green-500 */
+    color: white;
+    font-weight: bold;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-success:hover {
+    background-color: #10B981; /* Green-600 */
+}
+
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nav-link {
+    @apply relative text-gray-700 hover:text-indigo-600 font-medium py-2 transition duration-300;
+}
+
+.nav-link::after {
+    content: '';
+    @apply absolute left-0 bottom-0 w-0 h-0.5 bg-indigo-600 transition-all duration-300;
+}
+
+.nav-link:hover::after {
+    @apply w-full;
+}
+
+.nav-link.active {
+    @apply text-indigo-600;
+}
+
+.nav-link.active::after {
+    @apply w-full;
+}
+
+/* Animation for dropdown */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-animate {
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+.footer-link {
+    @apply text-gray-400 hover:text-white transition duration-300;
+}
+
+.social-icon {
+    @apply w-10 h-10 flex items-center justify-center rounded-full bg-indigo-700 hover:bg-indigo-600 text-white transition duration-300;
+}
+
+.footer-title {
+    @apply text-white font-medium mb-4 text-lg;
+}
+
+.gradient-line {
+    background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+    height: 3px;
+    width: 40px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--borderSubtle);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.15);
+}
