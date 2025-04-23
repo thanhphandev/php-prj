@@ -23,12 +23,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user = verifyLogin($login, $password);
 
         if ($user) {
-            // Set session variables
             $_SESSION['user'] = [
                 'id' => $user['id'],
                 'username' => $user['username'],
                 'fullname' => $user['fullname'],
-                'avatar' => $user['avatar']
+                'avatar' => $user['avatar'],
+                'email' => $user['email'],
+                'role' => $user['role'],
             ];
 
             header("Location: /index.php");
@@ -46,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập | Zesty</title>
+    <title>Đăng nhập tài khoản | Zesty</title>
     <link rel="icon" href="/assets/images/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="/assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -56,15 +57,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <body class="bg-background min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        <div class="flex justify-center mb-6">
-            <div class="flex items-center">
-                <img class="h-10 w-10" src="/assets/images/logo.png" alt="Zesty Logo">
-                <h1 class="ml-2 text-2xl font-bold text-primary">Zesty AI</h1>
-            </div>
+        <div class="text-center mb-2">
+            <img src="/assets/images/logo.png" class="mx-auto h-12 w-12" alt="Logo">
+            <h2 class="mt-4 text-2xl font-bold text-primary">Đăng nhập vào Zesty</h2>
+            <p class="text-sm text-gray-500">Chào mừng bạn quay lại!</p>
         </div>
-
-        <h2 class="text-center text-2xl font-extrabold text-primary mb-6">Đăng nhập</h2>
-
         <?php if (!empty($error)): ?>
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
                 <i class="fas fa-exclamation-circle mr-2"></i>
@@ -73,97 +70,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
 
         <form id="loginForm" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="space-y-6">
-            <div class="flex flex-col gap-5">
 
-                <div class="grid grid-cols-1 gap-3">
-                    <div>
-                        <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <img src="/assets/images/google.png" class="w-5 h-5 mr-2" alt="Google Logo"/>
-                            Tiếp tục với Google
-                        </a>
-                    </div>
-                    <!-- <div>
-                        <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <img src="/assets/images/github.png" class="w-5 h-5 mr-2" alt="Github Logo"/>
-                            Github
-                        </a>
-                    </div> -->
-
-                </div>
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">
-                            Hoặc đăng nhập bằng
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="">
-                <label for="login" class="block text-sm font-medium text-gray-700">Tên đăng nhập hoặc Email</label>
-                <div class="mt-1 relative rounded-md shadow-sm">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-user text-gray-400"></i>
-                    </div>
-                    <input value="<?php echo htmlspecialchars($login); ?>"
-                        type="text"
-                        id="login"
-                        name="login"
-                        class="pl-10 block w-full py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        placeholder="Nhập tên đăng nhập hoặc email"
-                        required
-                        autocomplete="username">
+            <!-- Google login -->
+            <div class="flex flex-col space-y-4">
+                <button type="button"
+                    class="flex items-center justify-center gap-3 w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-sm text-gray-700 hover:bg-gray-50 transition">
+                    <img src="/assets/images/google.png" alt="Google Logo" class="w-5 h-5" />
+                    <span class="font-semibold">Tiếp tục với Google</span>
+                </button>
+                <div class="relative flex items-center justify-center">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <div class="mx-4 text-sm text-gray-500">hoặc đăng nhập bằng tài khoản</div>
+                    <div class="flex-grow border-t border-gray-200"></div>
                 </div>
             </div>
 
-            <div>
+            <!-- Tên đăng nhập/email -->
+            <div class="space-y-1">
+                <label for="login" class="block text-sm font-medium text-gray-700">Tên đăng nhập hoặc email</label>
+                <input type="text" id="login" name="login" required autocomplete="username"
+                    value="<?php echo htmlspecialchars($login); ?>"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                    placeholder="Nhập tên đăng nhập hoặc email">
+            </div>
+
+            <!-- Mật khẩu -->
+            <div class="space-y-1">
                 <label for="password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
-                <div class="mt-1 relative rounded-md shadow-sm">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-lock text-gray-400"></i>
-                    </div>
-                    <input type="password"
-                        id="password"
-                        name="password"
-                        class="pl-10 pr-10 block w-full py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        placeholder="Nhập mật khẩu"
-                        required
-                        autocomplete="current-password">
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <div class="relative">
+                    <input type="password" id="password" name="password" required autocomplete="current-password"
+                        class="w-full px-4 py-2 pr-11 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Nhập mật khẩu">
+                    <div class="absolute inset-y-0 right-3 flex items-center">
                         <i class="toggle-password fas fa-eye text-gray-400 cursor-pointer"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-end">
 
-                <div class="text-sm">
-                    <a href="forgot-password.php" class="font-medium text-blue-600 hover:text-blue-500">
-                        Quên mật khẩu?
-                    </a>
-                </div>
+            <!-- Quên mật khẩu -->
+            <div class="flex justify-end text-sm">
+                <a href="forgot-password.php" class="text-blue-600 hover:underline">Quên mật khẩu?</a>
             </div>
 
+            <!-- Submit -->
             <div>
                 <button type="submit"
-                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <i class="fas fa-sign-in-alt"></i>
-                    </span>
+                    class="w-full flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                    <i class="fas fa-sign-in-alt"></i>
                     Đăng nhập
                 </button>
             </div>
 
-            <div class="text-center mt-4">
-                <p class="text-sm text-gray-600">
-                    Chưa có tài khoản? <a href="/auth/sign-up.php" class="font-medium text-blue-600 hover:text-blue-500">Đăng ký ngay</a>
-                </p>
+            <!-- Chưa có tài khoản -->
+            <div class="text-center text-sm text-gray-600">
+                Bạn chưa có tài khoản?
+                <a href="/auth/sign-up.php" class="text-blue-600 hover:underline font-medium">Đăng ký ngay</a>
             </div>
 
-
         </form>
+
     </div>
 
     <script>
@@ -181,28 +147,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             });
 
-            // Form validation
             $('#loginForm').on('submit', function(e) {
                 const login = $('#login').val().trim();
                 const password = $('#password').val();
 
-                // Reset error messages
+                // Remove previous error messages
                 $('.error-message').remove();
 
                 let hasError = false;
 
                 if (login === '') {
-                    $('#login').after('<p class="text-red-500 text-xs mt-1 error-message">Vui lòng nhập tên đăng nhập hoặc email</p>');
+                    $('#login').addClass('border-red-500').after('<p class="text-red-500 text-xs mt-1 error-message">Vui lòng nhập tên đăng nhập hoặc email</p>');
                     hasError = true;
+                } else {
+                    $('#login').removeClass('border-red-500');
                 }
 
                 if (password === '') {
-                    $('#password').after('<p class="text-red-500 text-xs mt-1 error-message">Vui lòng nhập mật khẩu</p>');
+                    $('#password').addClass('border-red-500').after('<p class="text-red-500 text-xs mt-1 error-message">Vui lòng nhập mật khẩu</p>');
                     hasError = true;
+                } else {
+                    $('#password').removeClass('border-red-500');
                 }
 
                 if (hasError) {
                     e.preventDefault();
+                } else {
+                    $('button[type="submit"]').html('<i class="fas fa-spinner fa-spin mr-2"></i> Đang xử lý...');
                 }
             });
         });

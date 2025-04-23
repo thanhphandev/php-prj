@@ -1,4 +1,3 @@
-
 </main>
 <footer class="bg-gray-900 text-white pt-16 pb-8">
     <div class="container mx-auto px-4">

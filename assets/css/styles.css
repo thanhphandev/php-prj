@@ -2,7 +2,7 @@
 :root {
     --primary: #7B61FF;
     --hover: #6C52E0;
-    --accent: #A693FF;
+    --accent: #644ec5;
     --background: #F5F7FF;
     --borderSubtle: #DADFFF;
 }
@@ -15,6 +15,10 @@
 
 .text-primary {
     color: var(--primary);
+}
+
+.text-accent {
+    color: var(--accent);
 }
 
 .bg-accent {

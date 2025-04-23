@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS chat_history (
     session_id VARCHAR(50) NOT NULL,
     session_name VARCHAR(100) DEFAULT 'New Chat',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -51,6 +52,6 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
 
 -- Insert default subscription plans
 INSERT INTO subscription_plans (name, price, requests_limit, features) VALUES
-('Free', 0.00, 10, '✔ Basic access\n✔ Grammar suggestions\n✔ Limit of 10 requests/day\n✉️ Basic support'),
-('Standard', 69000.00, 50, '✔ All Free features\n✔ 50 requests/day\n⚡ Faster response time\n✉️ Basic support'),
-('Premium', 189000.00, 500, '✔ All Basic features\n✔ 500 requests/day\n🚀 Priority support\n🧠 Advanced grammar tools');
+('Free', 0.00, 10, 'Hỗ trợ 10 yêu cầu/ngày\n✔ Truy cập vào các tính năng cơ bản\n✉️ Hỗ trợ cơ bản'),
+('Basic', 59000.00, 20, '✔ Tất cả các tính năng miễn phí\n✔ 20 yêu cầu/ngày\n✉️ Hỗ trợ cơ bản'),
+('Premium', 189000.00, 500, '✔ Tất cả các tính năng miễn phí\n✔ 500 yêu cầu/ngày\n✉️ Hỗ trợ ưu tiên'),

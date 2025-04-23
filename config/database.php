@@ -3,7 +3,7 @@
 $host = 'localhost';
 $dbname = 'aichat_db';
 $username = 'root';
-$password = '';
+$password = 'vertrigo';
 
 
 try{
