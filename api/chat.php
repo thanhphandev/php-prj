@@ -33,7 +33,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         exit;
     }
 
-    $apiResponse = sendGroqRequest($message, $type);
+    $chat_history = getChatHistory($userId, $sessionId);
+
+    $apiResponse = sendGroqRequest($message, $type, $chat_history);
     if (!isset($apiResponse['choices'][0]['message']['content'])) {
         echo json_encode(['error' => 'Phản hồi từ API không hợp lệ', 'raw' => $apiResponse]);
         exit;

@@ -71,8 +71,8 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
             <div class="flex items-center space-x-4">
                 <div class="font-medium">Model:</div>
                 <select id="chatTypeSelect" class="bg-gray-100 border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-                    <option value="text">Default AI</option>
-                    <option value="creative">Creative AI</option>
+                    <option value="text">Trò chuyện</option>
+                    <option value="grammar">Check ngữ pháp</option>
                     <option value="code">Code Assistant</option>
                 </select>
             </div>
@@ -261,13 +261,12 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
                     $('#loading').addClass('hidden');
 
                     if (data.success && data.messages && data.messages.length > 0) {
-                        renderMessages(data.messages); //check
-                        updateUrlWithSessionId(sessionId); //check
+                        renderMessages(data.messages);
                     } else if (data.success && (!data.messages || data.messages.length === 0)) {
                         $('#chatMessages').addClass('hidden');
                         $('#welcomeMessage').removeClass('hidden');
                     } else {
-                        addSystemMessage('error', data.error || 'Failed to load chat history.');
+                        addSystemMessage('error', data.error || 'Failed to load chat sesion.');
                     }
 
                     highlightActiveSession();
@@ -348,8 +347,8 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
             const messageHtml = `
         <div class="message ${sender === 'user' ? 'user-message' : 'ai-message'}">
             <div class="flex items-start">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3 mt-0.5">
-                    ${sender === 'user' ? `<img src="<?= $user['avatar'] ?>" alt="User Avatar" class="w-10 h-10">` : `<image src="/assets/images/logo.png" alt="Logo" class="w-6 h-6 rounded-full">`}
+                <div class="flex items-center justify-center text-white font-bold mr-3 mt-0.5">
+                    ${sender === 'user' ? `<img src="<?= $user['avatar'] ?>" alt="User Avatar" class="w-8 h-8 rounded-full">` : `<image src="/assets/images/logo.png" alt="Logo" class="w-8 h-8 rounded-full">`}
                 </div>
                 <div class="flex-1">
                     <div class="font-medium text-sm mb-1">

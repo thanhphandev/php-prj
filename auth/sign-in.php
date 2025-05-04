@@ -9,9 +9,16 @@ if (isset($_SESSION['user'])) {
 }
 
 $error = '';
+$_GET['error'] = $_GET['error'] ?? null;
+if ($_GET['error'] == 'google_account_exists_with_password') {
+    $error = "Tài khoản này đã được đăng ký với mật khẩu. Vui lòng đăng nhập bằng mật khẩu.";
+} elseif ($_GET['error'] == 'google_login_failed') {
+    $error = "Đăng nhập bằng Google không thành công. Vui lòng thử lại.";
+}
+
 $login = '';
 
-// Process login form
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $login = trim($_POST['login']);
     $password = $_POST['password'];
@@ -73,11 +80,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <!-- Google login -->
             <div class="flex flex-col space-y-4">
-                <button type="button"
+                <a href="/auth/google-login.php"
                     class="flex items-center justify-center gap-3 w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-sm text-gray-700 hover:bg-gray-50 transition">
                     <img src="/assets/images/google.png" alt="Google Logo" class="w-5 h-5" />
                     <span class="font-semibold">Tiếp tục với Google</span>
-                </button>
+                </a>
                 <div class="relative flex items-center justify-center">
                     <div class="flex-grow border-t border-gray-200"></div>
                     <div class="mx-4 text-sm text-gray-500">hoặc đăng nhập bằng tài khoản</div>

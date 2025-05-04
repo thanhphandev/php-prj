@@ -35,58 +35,144 @@ function verifyLogin($login, $password)
     return false;
 }
 
-function sendGroqRequest($message, $type = 'chat')
+function sendGroqRequest($message, $type = 'chat', array $chat_history = []) 
 {
-    $apiKey = getenv('GROQ_API_KEY');
-    if (!$apiKey) {
-        $apiKey = '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';
-    }
-    $url = 'https://api.groq.com/openai/v1/chat/completions';
+    $apiKey = getenv('GROQ_API_KEY') ?: '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'; 
+    $url = 'https://api.groq.com/openai/v1/chat/completions'; 
+    
+    // Chọn system message dựa vào loại tương tác
+    switch ($type) {
+        case 'text':
+            $systemMessage = "Bạn là một trợ lý AI thông minh, thân thiện và hữu ích. Tôi sẽ gọi bạn là Groq Assistant.
 
-    $systemMessage = "Bạn là một trợ lý chat thông minh, chuyên nghiệp, sử dụng ngôn từ lịch sự, chuyên nghiệp";
-    if ($type === 'code') {
-        $systemMessage = "Bạn là một trợ lý lập trình viên, chuyên nghiệp, sử dụng ngôn từ lịch sự, chuyên nghiệp";
+Nhiệm vụ của bạn:
+- Trả lời câu hỏi một cách chính xác, đầy đủ nhưng ngắn gọn
+- Sử dụng giọng điệu thân thiện, tự nhiên như đang trò chuyện
+- Đưa ra thông tin hữu ích khi được yêu cầu
+- Sắp xếp thông tin rõ ràng, dễ hiểu
+- Sử dụng tiếng Việt tự nhiên, văn phong lịch sự
+  
+Khi người dùng hỏi về ý kiến, hãy đưa ra quan điểm rõ ràng thay vì liệt kê nhiều lựa chọn. Nếu câu hỏi khó hoặc mơ hồ, bạn có thể đề xuất một số cách hiểu khác nhau trước khi đưa ra câu trả lời.
+
+Luôn giữ thái độ lịch sự, hòa nhã và hỗ trợ người dùng một cách tốt nhất có thể.";
+            break;
+            
+        case 'grammar':
+            $systemMessage = "Bạn là chuyên gia ngôn ngữ học và biên tập viên tiếng Anh. Nhiệm vụ của bạn là kiểm tra, sửa lỗi và cải thiện chất lượng văn bản được cung cấp.
+
+Khi nhận được văn bản, bạn sẽ:
+1. Sửa lỗi chính tả, ngữ pháp và dấu câu
+2. Cải thiện cấu trúc câu, tính mạch lạc và sự liên kết
+3. Đề xuất cách diễn đạt tự nhiên, chuyên nghiệp hơn
+4. Chỉ ra các lỗi phổ biến để người dùng học hỏi
+
+Khi đưa ra phản hồi:
+- Luôn trình bày văn bản gốc (nếu ngắn) và bản đã sửa để so sánh
+- Giải thích các lỗi chính và lý do sửa
+- Đánh giá tổng thể về văn phong và độ chuyên nghiệp
+- Đề xuất cách cải thiện (nếu cần)
+
+Hãy sử dụng ngôn từ lịch sự, khuyến khích và mang tính giáo dục. Mục tiêu là giúp người dùng nâng cao kỹ năng viết tiếng Anh, không chỉ đơn thuần sửa lỗi.";
+            break;
+            
+        case 'code':
+            $systemMessage = "Bạn là một lập trình viên chuyên nghiệp với kiến thức sâu rộng về nhiều ngôn ngữ, framework và công nghệ lập trình. Tôi sẽ gọi bạn là Code Assistant.
+
+Nhiệm vụ của bạn:
+- Viết code rõ ràng, hiệu quả và tuân theo các tiêu chuẩn tốt nhất
+- Giải thích logic và cấu trúc code một cách dễ hiểu
+- Đề xuất cải tiến và tối ưu hóa khi thích hợp
+- Giúp debug và khắc phục lỗi
+- Cung cấp hướng dẫn chi tiết khi được yêu cầu
+
+Khi trả lời:
+1. Luôn đặt code trong khối code với định dạng ngôn ngữ phù hợp
+2. Cung cấp giải thích đầy đủ về cách code hoạt động
+3. Đề cập đến các lựa chọn thay thế nếu có
+4. Lưu ý về bảo mật, hiệu suất hoặc các vấn đề tiềm ẩn
+5. Hỏi thêm thông tin nếu yêu cầu chưa rõ ràng
+
+Hãy sử dụng ngôn từ chuyên nghiệp nhưng thân thiện, và luôn hướng đến việc giúp người dùng hiểu rõ về giải pháp được đề xuất.";
+            break;
+            
+        default:
+            $systemMessage = "Bạn là một trợ lý AI thông minh, chuyên nghiệp, sử dụng ngôn từ lịch sự và thân thiện.";
+            break;
     }
-    $data = [
-        'model' => 'llama3-70b-8192',
-        'messages' => [
-            [
-                'role' => 'system',
-                'content' => $systemMessage
-            ],
-            [
-                'role' => 'user',
-                'content' => $message
-            ]
-        ],
-        'temperature' => 0.7,
-        'max_tokens' => 2000,
+    
+    // Phần còn lại của function giữ nguyên
+    $messages = [
+        ['role' => 'system', 'content' => $systemMessage], 
     ];
+    
+    // Thêm lịch sử chat 
+    foreach ($chat_history as $entry) { 
+        $messages[] = [ 
+            'role' => $entry['is_user'] ? 'user' : 'assistant', 
+            'content' => $entry['message'] 
+        ]; 
+        if (!$entry['is_user'] && !empty($entry['response'])) { 
+            $messages[] = [ 
+                'role' => 'assistant', 
+                'content' => $entry['response'] 
+            ]; 
+        } 
+    } 
 
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // ⚠️ Tạm tắt kiểm tra SSL
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // ⚠️ Tạm tắt kiểm tra SSL
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $apiKey
+    // Thêm tin nhắn mới của người dùng 
+    $messages[] = ['role' => 'user', 'content' => $message]; 
+
+    $data = [ 
+        'model' => 'llama3-70b-8192', 
+        'messages' => $messages, 
+        'temperature' => 0.7, 
+        'max_tokens' => 2000, 
+    ]; 
+
+    $ch = curl_init($url); 
+    curl_setopt_array($ch, [ 
+        CURLOPT_RETURNTRANSFER => true, 
+        CURLOPT_POST => true, 
+        CURLOPT_POSTFIELDS => json_encode($data), 
+        CURLOPT_SSL_VERIFYPEER => false, 
+        CURLOPT_HTTPHEADER => [ 
+            'Content-Type: application/json', 
+            'Authorization: Bearer ' . $apiKey 
+        ] 
+    ]); 
+
+    $response = curl_exec($ch); 
+    $error = curl_error($ch); 
+    curl_close($ch); 
+
+    return $error 
+        ? ['success' => false, 'message' => $error] 
+        : json_decode($response, true); 
+}
+
+function getChatHistory($userId, $sessionId) {
+    global $pdo; // Giả sử $pdo đã khởi tạo kết nối PDO
+
+    $sql = "
+        SELECT 
+            m.is_user, 
+            m.message, 
+            m.response
+        FROM chat_history ch
+        JOIN messages m ON ch.id = m.chat_id
+        WHERE ch.user_id = :user_id AND ch.session_id = :session_id
+        ORDER BY m.created_at ASC
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':user_id' => $userId,
+        ':session_id' => $sessionId
     ]);
 
-    $response = curl_exec($ch);
-    $error = curl_error($ch);
-    curl_close($ch);
-
-    if ($error) {
-        return [
-            'success' => false,
-            'message' => $error
-        ];
-    }
-
-    return json_decode($response, true);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 function generateSessionName($message): string
 {
