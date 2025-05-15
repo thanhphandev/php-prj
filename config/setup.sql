@@ -52,6 +52,6 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
 
 -- Insert default subscription plans
 INSERT INTO subscription_plans (name, price, requests_limit, features) VALUES
-('Free', 0.00, 10, 'Hỗ trợ 10 yêu cầu/ngày\n✔ Truy cập vào các tính năng cơ bản\n✉️ Hỗ trợ cơ bản'),
-('Basic', 59000.00, 20, '✔ Tất cả các tính năng miễn phí\n✔ 20 yêu cầu/ngày\n✉️ Hỗ trợ cơ bản'),
-('Premium', 189000.00, 500, '✔ Tất cả các tính năng miễn phí\n✔ 500 yêu cầu/ngày\n✉️ Hỗ trợ ưu tiên'),
+('Free', 0.00, 10, 'Hỗ trợ 10 yêu cầu/ngày|Truy cập vào các tính năng cơ bản| Hỗ trợ cơ bản'),
+('Standard', 59000.00, 20, 'Tất cả các tính năng miễn phí| 20 yêu cầu/ngày| Hỗ trợ cơ bản'),
+('Premium', 189000.00, 500, 'Tất cả các tính năng miễn phí| 500 yêu cầu/ngày| Hỗ trợ ưu tiên');

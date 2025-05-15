@@ -1,8 +1,5 @@
 <?php
 session_start();
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
 require_once 'config/database.php';
 $title ??= 'Trang chủ Zesty AI';
 $user = $_SESSION['user'] ?? null;
@@ -33,21 +30,13 @@ $isLoggedIn = isset($user) && !empty($user['username']);
                     <img class="w-10 h-10 object-contain" src="/assets/images/logo.png" alt="Zesty AI Logo">
                     <div class="hidden sm:flex flex-col">
                         <h1 class="text-xl font-bold text-indigo-600">Zesty AI</h1>
-                        <span class="text-xs text-accent">Trí tuệ nhân tạo tương tác</span>
+                        <span class="text-xs text-accent">Trợ lý ảo AI 4.0</span>
                     </div>
                 </a>
 
                 <!-- User Menu or Auth Buttons -->
                 <div class="flex items-center space-x-4">
-                    <?php if ($isLoggedIn): ?>
-                        <!-- Notification Icon -->
-                        <div class="relative">
-                            <button class="text-gray-600 hover:text-indigo-600 transition duration-300">
-                                <i class="fa-regular fa-bell text-xl"></i>
-                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
-                            </button>
-                        </div>
-
+                    <?php if ($isLoggedIn): ?>                       
                         <!-- User Profile Dropdown -->
                         <div class="relative">
                             <div id="avatar" class="flex items-center space-x-2 cursor-pointer">
@@ -71,14 +60,13 @@ $isLoggedIn = isset($user) && !empty($user['username']);
                                         <i class="fa-solid fa-user text-gray-500 w-5"></i>
                                         <span class="ml-3 text-gray-700">Hồ sơ cá nhân</span>
                                     </a>
-                                    <a href="/settings.php" class="flex items-center px-4 py-3 hover:bg-gray-50 transition duration-300">
-                                        <i class="fa-solid fa-gear text-gray-500 w-5"></i>
-                                        <span class="ml-3 text-gray-700">Cài đặt</span>
-                                    </a>
-                                    <a href="/usage.php" class="flex items-center px-4 py-3 hover:bg-gray-50 transition duration-300">
-                                        <i class="fa-solid fa-chart-simple text-gray-500 w-5"></i>
-                                        <span class="ml-3 text-gray-700">Thống kê sử dụng</span>
-                                    </a>
+                                    <?php if (isset($user['role']) && strtolower($user['role']) === 'admin'): ?>
+                                        <a href="/admin.php" class="flex items-center px-4 py-3 hover:bg-gray-50 transition duration-300">
+                                            <i class="fa-solid fa-toolbox text-gray-500 w-5"></i>
+                                            <span class="ml-3 text-gray-700">Trang Admin</span>
+                                        </a>
+                                    <?php endif; ?>
+
                                 </div>
 
                                 <div class="py-2 border-t border-gray-100">

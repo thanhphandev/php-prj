@@ -119,23 +119,21 @@
 </div>
 
 <script>
-    // Back to top button functionality
-    const backToTopButton = document.getElementById("back-to-top");
+    $(document).ready(function() {
+        const $backToTopButton = $("#back-to-top");
 
-    window.addEventListener("scroll", () => {
-        if (window.pageYOffset > 300) {
-            backToTopButton.classList.remove("opacity-0", "invisible");
-            backToTopButton.classList.add("opacity-100", "visible");
-        } else {
-            backToTopButton.classList.add("opacity-0", "invisible");
-            backToTopButton.classList.remove("opacity-100", "visible");
-        }
-    });
+        $(window).on("scroll", function() {
+            if ($(window).scrollTop() > 300) {
+                $backToTopButton.removeClass("opacity-0 invisible").addClass("opacity-100 visible");
+            } else {
+                $backToTopButton.addClass("opacity-0 invisible").removeClass("opacity-100 visible");
+            }
+        });
 
-    backToTopButton.addEventListener("click", () => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
+        $backToTopButton.on("click", function() {
+            $("html, body").animate({
+                scrollTop: 0
+            }, "smooth");
         });
     });
 </script>

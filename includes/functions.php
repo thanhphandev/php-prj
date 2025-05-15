@@ -35,123 +35,95 @@ function verifyLogin($login, $password)
     return false;
 }
 
-function sendGroqRequest($message, $type = 'chat', array $chat_history = []) 
+function getUserById($userId)
 {
-    $apiKey = getenv('GROQ_API_KEY') ?: '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'; 
-    $url = 'https://api.groq.com/openai/v1/chat/completions'; 
-    
-    // Chọn system message dựa vào loại tương tác
-    switch ($type) {
-        case 'text':
-            $systemMessage = "Bạn là một trợ lý AI thông minh, thân thiện và hữu ích. Tôi sẽ gọi bạn là Groq Assistant.
+    global $pdo;
 
-Nhiệm vụ của bạn:
-- Trả lời câu hỏi một cách chính xác, đầy đủ nhưng ngắn gọn
-- Sử dụng giọng điệu thân thiện, tự nhiên như đang trò chuyện
-- Đưa ra thông tin hữu ích khi được yêu cầu
-- Sắp xếp thông tin rõ ràng, dễ hiểu
-- Sử dụng tiếng Việt tự nhiên, văn phong lịch sự
-  
-Khi người dùng hỏi về ý kiến, hãy đưa ra quan điểm rõ ràng thay vì liệt kê nhiều lựa chọn. Nếu câu hỏi khó hoặc mơ hồ, bạn có thể đề xuất một số cách hiểu khác nhau trước khi đưa ra câu trả lời.
-
-Luôn giữ thái độ lịch sự, hòa nhã và hỗ trợ người dùng một cách tốt nhất có thể.";
-            break;
-            
-        case 'grammar':
-            $systemMessage = "Bạn là chuyên gia ngôn ngữ học và biên tập viên tiếng Anh. Nhiệm vụ của bạn là kiểm tra, sửa lỗi và cải thiện chất lượng văn bản được cung cấp.
-
-Khi nhận được văn bản, bạn sẽ:
-1. Sửa lỗi chính tả, ngữ pháp và dấu câu
-2. Cải thiện cấu trúc câu, tính mạch lạc và sự liên kết
-3. Đề xuất cách diễn đạt tự nhiên, chuyên nghiệp hơn
-4. Chỉ ra các lỗi phổ biến để người dùng học hỏi
-
-Khi đưa ra phản hồi:
-- Luôn trình bày văn bản gốc (nếu ngắn) và bản đã sửa để so sánh
-- Giải thích các lỗi chính và lý do sửa
-- Đánh giá tổng thể về văn phong và độ chuyên nghiệp
-- Đề xuất cách cải thiện (nếu cần)
-
-Hãy sử dụng ngôn từ lịch sự, khuyến khích và mang tính giáo dục. Mục tiêu là giúp người dùng nâng cao kỹ năng viết tiếng Anh, không chỉ đơn thuần sửa lỗi.";
-            break;
-            
-        case 'code':
-            $systemMessage = "Bạn là một lập trình viên chuyên nghiệp với kiến thức sâu rộng về nhiều ngôn ngữ, framework và công nghệ lập trình. Tôi sẽ gọi bạn là Code Assistant.
-
-Nhiệm vụ của bạn:
-- Viết code rõ ràng, hiệu quả và tuân theo các tiêu chuẩn tốt nhất
-- Giải thích logic và cấu trúc code một cách dễ hiểu
-- Đề xuất cải tiến và tối ưu hóa khi thích hợp
-- Giúp debug và khắc phục lỗi
-- Cung cấp hướng dẫn chi tiết khi được yêu cầu
-
-Khi trả lời:
-1. Luôn đặt code trong khối code với định dạng ngôn ngữ phù hợp
-2. Cung cấp giải thích đầy đủ về cách code hoạt động
-3. Đề cập đến các lựa chọn thay thế nếu có
-4. Lưu ý về bảo mật, hiệu suất hoặc các vấn đề tiềm ẩn
-5. Hỏi thêm thông tin nếu yêu cầu chưa rõ ràng
-
-Hãy sử dụng ngôn từ chuyên nghiệp nhưng thân thiện, và luôn hướng đến việc giúp người dùng hiểu rõ về giải pháp được đề xuất.";
-            break;
-            
-        default:
-            $systemMessage = "Bạn là một trợ lý AI thông minh, chuyên nghiệp, sử dụng ngôn từ lịch sự và thân thiện.";
-            break;
-    }
-    
-    // Phần còn lại của function giữ nguyên
-    $messages = [
-        ['role' => 'system', 'content' => $systemMessage], 
-    ];
-    
-    // Thêm lịch sử chat 
-    foreach ($chat_history as $entry) { 
-        $messages[] = [ 
-            'role' => $entry['is_user'] ? 'user' : 'assistant', 
-            'content' => $entry['message'] 
-        ]; 
-        if (!$entry['is_user'] && !empty($entry['response'])) { 
-            $messages[] = [ 
-                'role' => 'assistant', 
-                'content' => $entry['response'] 
-            ]; 
-        } 
-    } 
-
-    // Thêm tin nhắn mới của người dùng 
-    $messages[] = ['role' => 'user', 'content' => $message]; 
-
-    $data = [ 
-        'model' => 'llama3-70b-8192', 
-        'messages' => $messages, 
-        'temperature' => 0.7, 
-        'max_tokens' => 2000, 
-    ]; 
-
-    $ch = curl_init($url); 
-    curl_setopt_array($ch, [ 
-        CURLOPT_RETURNTRANSFER => true, 
-        CURLOPT_POST => true, 
-        CURLOPT_POSTFIELDS => json_encode($data), 
-        CURLOPT_SSL_VERIFYPEER => false, 
-        CURLOPT_HTTPHEADER => [ 
-            'Content-Type: application/json', 
-            'Authorization: Bearer ' . $apiKey 
-        ] 
-    ]); 
-
-    $response = curl_exec($ch); 
-    $error = curl_error($ch); 
-    curl_close($ch); 
-
-    return $error 
-        ? ['success' => false, 'message' => $error] 
-        : json_decode($response, true); 
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :userId");
+    $stmt->bindParam(':userId', $userId);
+    $stmt->execute();
+    return $stmt->fetch();
 }
 
-function getChatHistory($userId, $sessionId) {
-    global $pdo; // Giả sử $pdo đã khởi tạo kết nối PDO
+function sendGeminiRequest($message, $type = 'chat', array $chat_history = [])
+{
+    $apiKey = "AIzaSyDjBTARObvuWKbY-gb03j0FOhjkTShbjWA";
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
+
+    // Prompt hệ thống
+    switch ($type) {
+        case 'code':
+            $systemMessage = "Bạn là Code Assistant - chuyên viết code sạch, hiệu quả và dễ hiểu.";
+            break;
+        case 'grammar':
+            $systemMessage = "Bạn là chuyên gia sửa lỗi và nâng cao văn phong tiếng Anh.";
+            break;
+        case 'text':
+        default:
+            $systemMessage = "Bạn là một trợ lý AI thân thiện, hiểu tiếng Việt và hỗ trợ trả lời các câu hỏi một cách chính xác, ngắn gọn.";
+            break;
+    }
+
+    // Tạo nội dung gửi đi
+    $parts = [['text' => $systemMessage]];
+    foreach ($chat_history as $entry) {
+        $parts[] = ['text' => ($entry['is_user'] ? "User: " : "Assistant: ") . $entry['message']];
+        if (!$entry['is_user'] && !empty($entry['response'])) {
+            $parts[] = ['text' => "Assistant: " . $entry['response']];
+        }
+    }
+    $parts[] = ['text' => "User: $message"];
+
+    $data = [
+        'contents' => [
+            ['parts' => $parts]
+        ],
+        'generationConfig' => [
+            'temperature' => 0.7,
+            'maxOutputTokens' => 2048
+        ]
+    ];
+
+    // Gửi request
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($data),
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json'
+        ]
+    ]);
+
+    $response = curl_exec($ch);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($error) {
+        return ['success' => false, 'error' => $error];
+    }
+
+    $result = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['success' => false, 'error' => 'Phản hồi không phải JSON hợp lệ', 'raw' => $response];
+    }
+
+    $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? null;
+    if (!$text) {
+        return ['success' => false, 'error' => 'Không tìm thấy nội dung phản hồi', 'raw' => $result];
+    }
+
+    return [
+        'success' => true,
+        'message' => $text,
+        'raw' => $result
+    ];
+}
+
+
+function getChatHistory($userId, $sessionId)
+{
+    global $pdo;
 
     $sql = "
         SELECT 
@@ -174,20 +146,26 @@ function getChatHistory($userId, $sessionId) {
 }
 
 
-function generateSessionName($message): string
+function generateSessionName(string $message): string
 {
-    $apiKey = getenv('GROQ_API_KEY') ?: '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';
-    $url = 'https://api.groq.com/openai/v1/chat/completions';
+    $apiKey = getenv('GEMINI_API_KEY') ?: 'AIzaSyDjBTARObvuWKbY-gb03j0FOhjkTShbjWA';
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey";
 
     $systemMessage = "Bạn là một agent chuyên đặt tiêu đề ngắn gọn cho các cuộc hội thoại, đủ ý rõ ràng tường minh. Viết tiêu đề cho cuộc hội thoại sau đây:";
+
+    $parts = [
+        ['text' => $systemMessage],
+        ['text' => "User: $message"]
+    ];
+
     $data = [
-        'model' => 'llama3-70b-8192',
-        'messages' => [
-            ['role' => 'system', 'content' => $systemMessage],
-            ['role' => 'user', 'content' => $message]
+        'contents' => [
+            ['parts' => $parts]
         ],
-        'temperature' => 0.7,
-        'max_tokens' => 120,
+        'generationConfig' => [
+            'temperature' => 0.7,
+            'maxOutputTokens' => 120
+        ]
     ];
 
     $ch = curl_init($url);
@@ -195,11 +173,9 @@ function generateSessionName($message): string
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode($data),
-        CURLOPT_SSL_VERIFYPEER => false, // ⚠️ Chỉ dùng tạm cho dev/testing
         CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $apiKey
-        ],
+            'Content-Type: application/json'
+        ]
     ]);
 
     $response = curl_exec($ch);
@@ -211,8 +187,21 @@ function generateSessionName($message): string
     }
 
     $json = json_decode($response, true);
-    return $json['choices'][0]['message']['content'] ?? 'Không thể tạo tiêu đề';
+
+    $title = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+
+    if (!$title) {
+        return 'Không thể tạo tiêu đề';
+    }
+
+    $title = trim($title);
+    $title = preg_replace('/^[\*\s]+|[\*\s]+$/u', '', $title); // Bỏ ** ở đầu/cuối và khoảng trắng thừa
+    $title = preg_replace('/[\.\n\r]+$/u', '', $title);        // Bỏ dấu chấm hoặc xuống dòng ở cuối
+    $title = preg_replace('/\s{2,}/u', ' ', $title);           // Rút gọn khoảng trắng liên tiếp
+
+    return $title;
 }
+
 
 
 function saveChat($userId, $sessionId, $message, $response)
@@ -321,6 +310,7 @@ function getUserChatSessions(int $userId): array
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 }
+
 
 function getChatMessages(int $chatId): array
 {

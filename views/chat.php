@@ -12,7 +12,7 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
 ?>
 
 <!-- Main container -->
-<div class="flex h-screen bg-gray-50 text-gray-900">
+<div class="flex max-w-screen-xl w-full h-screen overflow-hidden bg-gray-50 text-gray-900">
     <div class="hidden md:flex w-64 bg-gray-800 text-white flex-col">
         <!-- Logo/Brand area -->
         <div class="p-4 border-b border-gray-700 flex items-center justify-between">

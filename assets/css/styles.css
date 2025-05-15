@@ -7,6 +7,29 @@
     --borderSubtle: #DADFFF;
 }
 
+.code-block {
+    position: relative;
+    margin: 1rem 0;
+}
+.copy-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background-color: rgba(209, 213, 219, 0.8);
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.message-content {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            color: #333;
+        }
+.copy-button:hover {
+    background-color: rgba(156, 163, 175, 0.8);
+}
 
 /* Định nghĩa lớp CSS */
 .bg-primary {
