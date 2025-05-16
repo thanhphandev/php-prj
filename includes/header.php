@@ -36,14 +36,15 @@ $isLoggedIn = isset($user) && !empty($user['username']);
 
                 <!-- User Menu or Auth Buttons -->
                 <div class="flex items-center space-x-4">
-                    <?php if ($isLoggedIn): ?>                       
+                    <?php if ($isLoggedIn): ?>
                         <!-- User Profile Dropdown -->
-                        <div class="relative">
-                            <div id="avatar" class="flex items-center space-x-2 cursor-pointer">
-                                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-indigo-100 hover:border-indigo-300 transition duration-300">
-                                    <img class="w-full h-full object-cover" src="<?= $user['avatar'] ?>" alt="Ảnh hồ sơ">
-                                </div>
-                            </div>
+                        <div class="relative" id="avatar">
+                            <button type="button" class="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                <span class="sr-only">Open user menu</span>
+                                <img class="h-8 w-8 rounded-full" src="<?php echo htmlspecialchars($_SESSION['user']['avatar'] ?? 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'); ?>" alt="Profile Image">
+                                <span class="ml-2 mr-1 text-gray-700"><?php echo htmlspecialchars($_SESSION['user']['username']); ?></span>
+                                <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                            </button>
 
                             <div id="dropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-100 hidden dropdown-animate z-50">
                                 <div class="p-4 border-b border-gray-100">
@@ -58,12 +59,21 @@ $isLoggedIn = isset($user) && !empty($user['username']);
                                 <div class="py-2">
                                     <a href="/profile.php" class="flex items-center px-4 py-3 hover:bg-gray-50 transition duration-300">
                                         <i class="fa-solid fa-user text-gray-500 w-5"></i>
-                                        <span class="ml-3 text-gray-700">Hồ sơ cá nhân</span>
+                                        <span class="ml-3 text-gray-700">Thông tin hồ sơ</span>
+                                    </a>
+                                    <a href="/chat.php" class="flex items-center px-4 py-3 hover:bg-gray-50 transition duration-300">
+                                        <i class="fa-solid fa-comments text-gray-500 w-5"></i>
+                                        <span class="ml-3 text-gray-700">Chat ngay</span>
+                                    </a>
+                                    <a href="/subscription-plans.php" class="flex items-center px-4 py-3 hover:bg-gray-50 transition duration-300">
+                                        <i class="fa-solid fa-crown text-gray-500 w-5"></i>
+                                        <span class="ml-3 text-gray-700">Gói đăng ký</span>
                                     </a>
                                     <?php if (isset($user['role']) && strtolower($user['role']) === 'admin'): ?>
-                                        <a href="/admin.php" class="flex items-center px-4 py-3 hover:bg-gray-50 transition duration-300">
-                                            <i class="fa-solid fa-toolbox text-gray-500 w-5"></i>
-                                            <span class="ml-3 text-gray-700">Trang Admin</span>
+                                        <a href="/admin/index.php">
+                                            <div class="px-4 py-2 text-sm text-gray-700" role="menuitem">
+                                                <i class="fas fa-tachometer-alt mr-2"></i> Bảng điều khiển
+                                            </div>
                                         </a>
                                     <?php endif; ?>
 

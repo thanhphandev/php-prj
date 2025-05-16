@@ -12,7 +12,7 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
 ?>
 
 <!-- Main container -->
-<div class="flex max-w-screen-xl w-full h-screen overflow-hidden bg-gray-50 text-gray-900">
+<div class="flex h-screen bg-gray-50 text-gray-900">
     <div class="hidden md:flex w-64 bg-gray-800 text-white flex-col">
         <!-- Logo/Brand area -->
         <div class="p-4 border-b border-gray-700 flex items-center justify-between">
@@ -39,8 +39,11 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
             </div>
 
             <button id="upgradeBtn" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-1.5 rounded-md text-sm font-medium">
-                Nâng cấp gói PRO
+                <a href="subscription-plans.php">
+                    <i class="fas fa-arrow-up mr-1"></i> Nâng cấp gói
+                </a>
             </button>
+
         </div>
 
         <!-- Chat history list -->
@@ -66,67 +69,66 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
     </div>
     <!-- Main chat area -->
     <div class="flex-1 flex flex-col">
-        <!-- Chat type selection -->
+        <!-- Chọn loại AI -->
         <div class="bg-white border-b border-gray-200 p-3 flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <div class="font-medium">Model:</div>
+                <div class="font-medium">Mô hình:</div>
                 <select id="chatTypeSelect" class="bg-gray-100 border border-gray-300 rounded-md px-3 py-1.5 text-sm">
-                    <option value="text">Trò chuyện</option>
-                    <option value="grammar">Check ngữ pháp</option>
-                    <option value="code">Code Assistant</option>
+                    <option value="text">Trò chuyện chung</option>
+                    <option value="creative">Check ngữ pháp</option>
+                    <option value="code">Trợ lý lập trình</option>
                 </select>
             </div>
 
             <div class="hidden md:inline text-sm text-gray-500">
                 <i class="fas fa-info-circle mr-1"></i>
-                <span id="modelInfoText">Standard text model for general assistance</span>
+                <span id="modelInfoText">Mô hình tiêu chuẩn cho trợ giúp chung</span>
             </div>
         </div>
 
-        <!-- Chat messages container -->
+        <!-- Khu vực hiển thị tin nhắn -->
         <div class="flex-1 overflow-y-auto p-4 bg-white" id="chatMessagesContainer">
-            <!-- Welcome message for new chat -->
+            <!-- Tin nhắn chào mừng -->
             <div class="flex flex-col items-center justify-center h-full text-center px-4" id="welcomeMessage">
                 <div class="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
                     <img src="/assets/images/logo.png" alt="Logo" class="w-12 h-12">
                 </div>
-                <h2 class="text-2xl font-bold mb-2">AI Assistant</h2>
-                <p class="text-gray-600 mb-6 max-w-md">How can I help you today? Ask me anything or select one of the suggestions below.</p>
+                <h2 class="text-2xl font-bold mb-2">Trợ lý Zesty AI</h2>
+                <p class="text-gray-600 mb-6 max-w-md">Tôi có thể giúp gì cho bạn hôm nay? Hãy đặt câu hỏi hoặc chọn một gợi ý bên dưới.</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 w-full max-w-xl">
                     <button class="suggestion-btn bg-gray-100 hover:bg-gray-200 p-3 rounded-lg text-left">
-                        <div class="font-medium mb-1">Write an essay</div>
-                        <div class="text-sm text-gray-600">on any topic with detailed research</div>
+                        <div class="font-medium mb-1">Viết bài luận</div>
+                        <div class="text-sm text-gray-600">về bất kỳ chủ đề nào với nghiên cứu chi tiết</div>
                     </button>
                     <button class="suggestion-btn bg-gray-100 hover:bg-gray-200 p-3 rounded-lg text-left">
-                        <div class="font-medium mb-1">Explain a concept</div>
-                        <div class="text-sm text-gray-600">in simple terms I can understand</div>
+                        <div class="font-medium mb-1">Giải thích khái niệm</div>
+                        <div class="text-sm text-gray-600">bằng ngôn ngữ đơn giản, dễ hiểu</div>
                     </button>
                     <button class="suggestion-btn bg-gray-100 hover:bg-gray-200 p-3 rounded-lg text-left">
-                        <div class="font-medium mb-1">Generate code</div>
-                        <div class="text-sm text-gray-600">for a specific programming task</div>
+                        <div class="font-medium mb-1">Tạo mã nguồn</div>
+                        <div class="text-sm text-gray-600">cho một tác vụ lập trình cụ thể</div>
                     </button>
                     <button class="suggestion-btn bg-gray-100 hover:bg-gray-200 p-3 rounded-lg text-left">
-                        <div class="font-medium mb-1">Create a plan</div>
-                        <div class="text-sm text-gray-600">for achieving a specific goal</div>
+                        <div class="font-medium mb-1">Lập kế hoạch</div>
+                        <div class="text-sm text-gray-600">để đạt được một mục tiêu cụ thể</div>
                     </button>
                 </div>
             </div>
 
-            <!-- Actual chat messages will be displayed here -->
+            <!-- Tin nhắn thực tế -->
             <div id="chatMessages" class="hidden space-y-6 pb-6"></div>
         </div>
 
-        <!-- Chat input area -->
+        <!-- Khu vực nhập tin nhắn -->
         <div class="border-t border-subtle bg-background p-4">
             <div class="relative">
                 <div class="rounded-lg border-subtle">
                     <textarea
                         id="messageInput"
                         class="w-full max-h-[200px] overflow-y-auto rounded-lg border-0 p-3 pr-20 resize-none focus:outline-none"
-                        placeholder="Câu hỏi của bạn là gì..."
+                        placeholder="Bạn muốn hỏi điều gì..."
                         rows="1"></textarea>
-
 
                     <div class="absolute bottom-8 right-2 flex items-center space-x-1">
                         <button
@@ -140,16 +142,16 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
 
                 <div class="mt-2 text-xs text-gray-500 flex justify-between">
                     <div>
-                        <span id="characterCount">0</span> characters
+                        <span id="characterCount">0</span> ký tự
                     </div>
                     <div>
-                        Zesty AI is powered by <a href="https://openai.com/" class="text-blue-500 hover:underline" target="_blank">OpenAI</a>
+                        Zesty AI được hỗ trợ bởi <a href="https://gemini.google.com/" class="text-blue-500 hover:underline" target="_blank">Gemini API</a>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
+
 </div>
 
 <!-- Loading indicator -->
@@ -209,19 +211,18 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
         function updateModelInfo() {
             let infoText = '';
             switch (currentChatType) {
-                case 'creative':
-                    infoText = 'Enhanced creative capabilities for stories, content generation';
+                case 'grammar':
+                    infoText = 'Tối ưu cho kiểm tra ngữ pháp và chính tả tiếng Anh';
                     break;
                 case 'code':
-                    infoText = 'Specialized for programming, debugging, and technical assistance';
+                    infoText = 'Tối ưu cho lập trình, sửa lỗi và hỗ trợ kỹ thuật';
                     break;
                 default:
-                    infoText = 'Standard text model for general assistance';
+                    infoText = 'Mô hình văn bản tiêu chuẩn cho trợ giúp chung';
             }
             $('#modelInfoText').text(infoText);
         }
 
-        // // Handle new chat button
         $('#newChatBtn').on('click', function() {
             createNewSession();
         });
@@ -261,12 +262,13 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
                     $('#loading').addClass('hidden');
 
                     if (data.success && data.messages && data.messages.length > 0) {
-                        renderMessages(data.messages);
+                        renderMessages(data.messages); //check
+                        updateUrlWithSessionId(sessionId); //check
                     } else if (data.success && (!data.messages || data.messages.length === 0)) {
                         $('#chatMessages').addClass('hidden');
                         $('#welcomeMessage').removeClass('hidden');
                     } else {
-                        addSystemMessage('error', data.error || 'Failed to load chat sesion.');
+                        addSystemMessage('error', data.error || 'Failed to load chat history.');
                     }
 
                     highlightActiveSession();
@@ -347,8 +349,8 @@ $requestsLeft = $userSubscription['requests_limit'] - $userSubscription['api_req
             const messageHtml = `
         <div class="message ${sender === 'user' ? 'user-message' : 'ai-message'}">
             <div class="flex items-start">
-                <div class="flex items-center justify-center text-white font-bold mr-3 mt-0.5">
-                    ${sender === 'user' ? `<img src="<?= $user['avatar'] ?>" alt="User Avatar" class="w-8 h-8 rounded-full">` : `<image src="/assets/images/logo.png" alt="Logo" class="w-8 h-8 rounded-full">`}
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3 mt-0.5">
+                    ${sender === 'user' ? `<img src="<?= $user['avatar'] ?>" alt="User Avatar" class="w-10 h-10">` : `<image src="/assets/images/logo.png" alt="Logo" class="w-6 h-6 rounded-full">`}
                 </div>
                 <div class="flex-1">
                     <div class="font-medium text-sm mb-1">

@@ -45,6 +45,260 @@ function getUserById($userId)
     return $stmt->fetch();
 }
 
+function isAdmin($userId) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("SELECT role FROM users WHERE id = :userId");
+    $stmt->bindParam(":userId", $userId);
+    $stmt->execute();
+    $role = $stmt->fetchColumn();
+    
+    return $role === 'admin';
+}
+
+function updateUserStatus($userId, $status, $adminId) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("UPDATE users SET status = :status WHERE id = :userId");
+    $stmt->bindParam(":status", $status);
+    $stmt->bindParam(":userId", $userId);
+    
+    $result = $stmt->execute();
+    
+    return $result;
+}
+
+function updateUserRole($userId, $role, $adminId) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("UPDATE users SET role = :role WHERE id = :userId");
+    $stmt->bindParam(":role", $role);
+    $stmt->bindParam(":userId", $userId);
+    
+    $result = $stmt->execute();
+
+    return $result;
+}
+
+function getAllUsers($search = '', $status = '', $role = '', $page = 1, $limit = 10, $currentUserId = null) {
+    global $pdo;
+
+    $offset = ($page - 1) * $limit;
+    $params = [];
+    $whereConditions = [];
+
+    if (!empty($search)) {
+        $whereConditions[] = "(username LIKE :search OR email LIKE :search OR fullname LIKE :search)";
+        $params[':search'] = "%$search%";
+    }
+
+    if (!empty($status)) {
+        $whereConditions[] = "status = :status";
+        $params[':status'] = $status;
+    }
+
+    if (!empty($role)) {
+        $whereConditions[] = "role = :role";
+        $params[':role'] = $role;
+    }
+
+    if (!empty($currentUserId)) {
+        $whereConditions[] = "id != :currentUserId";
+        $params[':currentUserId'] = $currentUserId;
+    }
+
+    $whereClause = !empty($whereConditions) ? "WHERE " . implode(' AND ', $whereConditions) : "";
+
+    // Count total users matching criteria
+    $countSql = "SELECT COUNT(*) FROM users $whereClause";
+    $countStmt = $pdo->prepare($countSql);
+    foreach ($params as $key => $value) {
+        $countStmt->bindValue($key, $value);
+    }
+    $countStmt->execute();
+    $totalUsers = $countStmt->fetchColumn();
+
+    // Get paginated users
+    $sql = "SELECT id, username, email, fullname, role, status, subscription_tier, 
+            api_requests_count, created_at, subscription_expiry, last_active 
+            FROM users $whereClause 
+            ORDER BY created_at DESC 
+            LIMIT :limit OFFSET :offset";
+
+    $stmt = $pdo->prepare($sql);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return [
+        'total' => $totalUsers,
+        'pages' => ceil($totalUsers / $limit),
+        'current_page' => $page,
+        'data' => $stmt->fetchAll()
+    ];
+}
+
+function createSubscriptionPlan($name, $price, $limit, $features, $adminId) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("INSERT INTO subscription_plans (name, price, requests_limit, features) VALUES (:name, :price, :limit, :features)");
+    $stmt->bindParam(":name", $name);
+    $stmt->bindParam(":price", $price);
+    $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
+    $stmt->bindParam(":features", $features);
+    
+    $result = $stmt->execute();
+
+    return $result;
+}
+
+function updateSubscriptionPlan($id, $name, $price, $limit, $features, $adminId) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("UPDATE subscription_plans SET name = :name, price = :price, requests_limit = :limit, features = :features WHERE id = :id");
+    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+    $stmt->bindParam(":name", $name);
+    $stmt->bindParam(":price", $price);
+    $stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
+    $stmt->bindParam(":features", $features);
+    
+    $result = $stmt->execute();
+    
+    return $result;
+}
+
+function deleteSubscriptionPlan($id, $adminId) {
+    global $pdo;
+    
+    // Get plan name before deleting
+    $stmt = $pdo->prepare("SELECT name FROM subscription_plans WHERE id = :id");
+    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $planName = $stmt->fetchColumn();
+    
+    // Delete the plan
+    $stmt = $pdo->prepare("DELETE FROM subscription_plans WHERE id = :id");
+    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+    
+    $result = $stmt->execute();
+    
+    return $result;
+}
+
+function getAdminPaginatedChatSessions($search = '', $userIdFilter = null, $page = 1, $limit = 10) {
+    global $pdo;
+    
+    $offset = ($page - 1) * $limit;
+    $params = [];
+    $whereConditions = [];
+    
+    if (!empty($search)) {
+        $whereConditions[] = "(ch.session_name LIKE :search OR u.username LIKE :search OR u.email LIKE :search)";
+        $params[':search'] = "%$search%";
+    }
+    
+    if (!empty($userIdFilter)) {
+        $whereConditions[] = "ch.user_id = :userIdFilter";
+        $params[':userIdFilter'] = $userIdFilter;
+    }
+    
+    $whereClause = !empty($whereConditions) ? "WHERE " . implode(' AND ', $whereConditions) : "";
+    
+    // Count total sessions matching criteria
+    $countSql = "SELECT COUNT(*) 
+                 FROM chat_history ch 
+                 JOIN users u ON ch.user_id = u.id 
+                 $whereClause";
+    $countStmt = $pdo->prepare($countSql);
+    foreach ($params as $key => $value) {
+        $countStmt->bindValue($key, $value);
+    }
+    $countStmt->execute();
+    $totalSessions = $countStmt->fetchColumn();
+    
+    // Get paginated sessions
+    $sql = "SELECT ch.*, u.username, u.email, 
+            (SELECT COUNT(*) FROM messages WHERE chat_id = ch.id) as message_count
+            FROM chat_history ch
+            JOIN users u ON ch.user_id = u.id
+            $whereClause 
+            ORDER BY ch.updated_at DESC 
+            LIMIT :limit OFFSET :offset";
+    
+    $stmt = $pdo->prepare($sql);
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    return [
+        'total' => $totalSessions,
+        'pages' => ceil($totalSessions / $limit),
+        'current_page' => $page,
+        'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)
+    ];
+}
+
+function resetUserApiRequests() {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("UPDATE users SET api_requests_count = 0");
+    return $stmt->execute();
+}
+
+function getSystemStats() {
+    global $pdo;
+    
+    $stats = [];
+    
+    // Total users
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users");
+    $stmt->execute();
+    $stats['total_users'] = $stmt->fetchColumn();
+    
+    // Total active users
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE status = 'active'");
+    $stmt->execute();
+    $stats['active_users'] = $stmt->fetchColumn();
+    
+    // Total premium users
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE subscription_tier != 'free'");
+    $stmt->execute();
+    $stats['premium_users'] = $stmt->fetchColumn();
+    
+    // New users (last 7 days)
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+    $stmt->execute();
+    $stats['new_users_week'] = $stmt->fetchColumn();
+    
+    // Total chat sessions
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM chat_history");
+    $stmt->execute();
+    $stats['total_chats'] = $stmt->fetchColumn();
+    
+    // Total messages
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM messages");
+    $stmt->execute();
+    $stats['total_messages'] = $stmt->fetchColumn();
+    
+    // Messages last 24 hours
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM messages WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)");
+    $stmt->execute();
+    $stats['messages_24h'] = $stmt->fetchColumn();
+    
+    // Plan distribution
+    $stmt = $pdo->prepare("SELECT subscription_tier, COUNT(*) as count FROM users GROUP BY subscription_tier");
+    $stmt->execute();
+    $stats['plans'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    return $stats;
+}
+
 function sendGeminiRequest($message, $type = 'chat', array $chat_history = [])
 {
     $apiKey = "AIzaSyDjBTARObvuWKbY-gb03j0FOhjkTShbjWA";
@@ -276,7 +530,6 @@ function incrementUserRequests($userId)
     $stmt->execute();
 }
 
-// Add new function for tracking subscription usage
 function getUserUsage($userId)
 {
     global $pdo;
